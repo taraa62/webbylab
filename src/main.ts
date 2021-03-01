@@ -20,7 +20,7 @@ export const bootstrap = async () => {
   );
   const options = new DocumentBuilder()
     .setTitle('WebbyLab')
-    .setVersion('1.0')
+    .setVersion('1.1')
     .addTag('WebbyLab API description')
     .addBearerAuth({ type: 'http' }, 'Authorization')
     // .addBearerAuth()

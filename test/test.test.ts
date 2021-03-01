@@ -69,7 +69,10 @@ describe('file tests', () => {
     expect(res.data).toHaveProperty('status', 'ok');
 
     const reFind = await axios.get('http://localhost:8082/find/name/Godzilla');
-    expect(reFind.data).toHaveLength(0);
+    expect(reFind.data).toHaveProperty(
+      'message',
+      'Sorry, we found nothing for you :(',
+    );
   });
 
   test('get a list of films', async () => {

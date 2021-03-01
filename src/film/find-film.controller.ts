@@ -10,7 +10,7 @@ import { ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
 import { FilmService } from './film.service';
 import { IFilmList } from './film';
 import { FilmResDto } from './film.dto';
-import { EFindLikeType, FindDto } from './find.dto';
+import { EFindLikeType, EmptySearch, FindDto } from './find.dto';
 
 @ApiTags('Find - user panel')
 @Controller('find')
@@ -24,8 +24,10 @@ export class FindFilmController {
     type: FilmResDto,
     isArray: true,
   })
-  public getFilms(): Promise<IFilmList[]> {
-    return this.service.getFilms();
+  public getFilms(): Promise<IFilmList[] | EmptySearch> {
+    return this.service
+      .getFilms()
+      .then((data) => (data.length ? data : new EmptySearch()));
   }
 
   @Get(':id')
@@ -48,13 +50,15 @@ export class FindFilmController {
   })
   public getFilmByName(
     @Param('name') name: string,
-  ): Promise<FilmResDto[] | IFilmList[]> {
+  ): Promise<FilmResDto[] | IFilmList[] | EmptySearch> {
     if (!name) throw new BadRequestException();
 
     const dto = new FindDto();
     dto.name = name;
     dto.like = EFindLikeType.LIKE;
-    return this.service.findFilms(dto);
+    return this.service
+      .findFilms(dto)
+      .then((data) => (data.length ? data : new EmptySearch()));
   }
 
   @Get('/actor/:actor')
@@ -65,13 +69,15 @@ export class FindFilmController {
   })
   public getFilmByActor(
     @Param('actor') actor: string,
-  ): Promise<FilmResDto[] | IFilmList[]> {
+  ): Promise<FilmResDto[] | IFilmList[] | EmptySearch> {
     if (!actor) throw new BadRequestException();
 
     const dto = new FindDto();
     dto.actors = actor;
     dto.like = EFindLikeType.LIKE;
-    return this.service.findFilms(dto);
+    return this.service
+      .findFilms(dto)
+      .then((data) => (data.length ? data : new EmptySearch()));
   }
 
   @Get('/')
@@ -81,7 +87,9 @@ export class FindFilmController {
     type: FilmResDto,
     isArray: true,
   })
-  public findFilm(@Query() opt: FindDto): Promise<FilmResDto[]> {
-    return this.service.findFilms(opt);
+  public findFilm(@Query() opt: FindDto): Promise<FilmResDto[] | EmptySearch> {
+    return this.service
+      .findFilms(opt)
+      .then((data) => (data.length ? data : new EmptySearch()));
   }
 }

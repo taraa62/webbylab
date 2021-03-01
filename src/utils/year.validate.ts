@@ -15,6 +15,10 @@ export class YearValidate implements ValidatorConstraintInterface {
     value = Number.parseInt(value, 0);
     return value > 1900 && value < new Date().getFullYear();
   }
+
+  public defaultMessage(args: ValidationArguments) {
+    return 'the year should begin from 1900 to the present';
+  }
 }
 
 export function IsYear(validationOptions?: ValidationOptions) {

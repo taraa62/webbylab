@@ -17,7 +17,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: tac62/webbylab:0.1
+    image: tac62/webbylab:0.2
     container_name: webby_lab_app
     env_file: .env
     restart: always

@@ -46,6 +46,7 @@ export class FilmModel {
 
   public findFilms(opt: FindDto) {
     const select: SelectQueryBuilder<FilmEntity> = this.repository.createQueryBuilder();
+    opt.join = opt.join ?? EFindJoinType.AND;
     const join = opt.join === EFindJoinType.OR ? 'orWhere' : 'andWhere';
     opt.like = opt.like ?? EFindLikeType.EQUAL;
 

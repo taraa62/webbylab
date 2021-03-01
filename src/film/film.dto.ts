@@ -1,4 +1,4 @@
-import { IsEnum, IsString, MaxLength } from 'class-validator';
+import { IsEnum, IsString, Length } from 'class-validator';
 import { Transform } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsYear } from '../utils/year.validate';
@@ -15,7 +15,7 @@ export class FilmReqDto {
   @ApiProperty({ type: String, description: 'name', example: 'Godzilla' })
   @Transform(trim)
   @IsString()
-  @MaxLength(500)
+  @Length(1, 500)
   public name: string;
 
   @ApiProperty({ type: String, description: 'year', example: '2010' })
@@ -42,7 +42,7 @@ export class FilmReqDto {
   })
   @Transform(trim)
   @IsString()
-  @MaxLength(2000)
+  @Length(1, 2000)
   public actors: string;
 }
 

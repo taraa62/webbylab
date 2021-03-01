@@ -3,34 +3,38 @@ import {
   Body,
   Controller,
   Delete,
+  ForbiddenException,
   Param,
   ParseIntPipe,
   Post,
   Put,
   Req,
   Res,
+  UploadedFile,
   UploadedFiles,
-  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { AdminGuard } from '../auth/admin.guard';
 import { AddFileDto, AddFilmFromFileResDto, FilmReqDto } from './film.dto';
 import { SuccessDelete, SuccessInsert } from '../app.dto';
 import { FilmService } from './film.service';
 import {
-  ApiBearerAuth,
   ApiBody,
   ApiConsumes,
+  ApiExcludeEndpoint,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { FileFieldsInterceptor } from '@nestjs/platform-express';
+import {
+  FileFieldsInterceptor,
+  FileInterceptor,
+} from '@nestjs/platform-express';
 import { Request, Response } from 'express';
+import { EmptyFile } from '../http-error/empty-file';
 
 @ApiTags('Film - admin panel')
 @Controller('film')
-@ApiBearerAuth('Authorization')
-@UseGuards(AdminGuard)
+// @ApiBearerAuth('Authorization')
+// @UseGuards(AdminGuard)
 export class FilmController {
   constructor(private service: FilmService) {}
 
@@ -40,7 +44,8 @@ export class FilmController {
     return this.service.addFilm(dto);
   }
 
-  @Post('/upload-list-swagger/')
+  @Post('/upload-list-swagger-old/')
+  @ApiExcludeEndpoint()
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     description: 'upload list of films via swagger',
@@ -48,7 +53,7 @@ export class FilmController {
     required: false,
   })
   @UseInterceptors(FileFieldsInterceptor([{ name: 'file', maxCount: 1 }]))
-  public async addFromFileSwagger(
+  public async addFromFileSwaggerOld(
     @UploadedFiles() files,
     @Body() dto: AddFileDto,
   ): Promise<SuccessInsert | AddFilmFromFileResDto> {
@@ -56,7 +61,33 @@ export class FilmController {
     if (!file) throw new BadRequestException();
     // TODO I don't handle big files.
     const str = file.buffer.toString('utf-8').trim();
-    return this.service.addFileFromFile(str);
+    return this.service.addFilmFromFile(str);
+  }
+
+  @Post('/upload-list-swagger/')
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      fileFilter: (req, file, callback) => {
+        if (
+          file.mimetype === 'text/plain' &&
+          file.originalname.endsWith('.txt')
+        ) {
+          return callback(null, true);
+        }
+        callback(new ForbiddenException(), false);
+      },
+    }),
+  )
+  public async addFromFileSwagger(
+    @UploadedFile() file,
+    @Body() dto: AddFileDto,
+  ): Promise<SuccessInsert | AddFilmFromFileResDto> {
+    if (!file) throw new BadRequestException();
+    if (!file.buffer.length) throw new EmptyFile();
+    // TODO I don't handle big files.
+    const str = file.buffer.toString().trim();
+    return this.service.addFilmFromFile(str);
   }
 
   @Post('/upload-list/')
@@ -79,7 +110,7 @@ export class FilmController {
         .split('---------------------')[0];
       if (str) {
         const result = await this.service
-          .addFileFromFile(str.trim())
+          .addFilmFromFile(str.trim())
           .catch((er) => er);
         res.status(200).send(result);
       }

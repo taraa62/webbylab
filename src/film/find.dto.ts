@@ -25,7 +25,7 @@ export class FindDto {
     description: 'sql join type',
     default: EFindJoinType.AND,
   })
-  readonly join: EFindJoinType;
+  join: EFindJoinType;
 
   @ApiProperty({
     type: EFindLikeType,
@@ -72,4 +72,8 @@ export class FindDto {
     description: 'format',
   })
   readonly format: EFilmFormat;
+}
+
+export class EmptySearch {
+  message = 'Sorry, we found nothing for you :(';
 }
